@@ -1,0 +1,50 @@
+{
+    "status": "success",
+    "message": "Job list retrieved successfully",
+    "data": [
+        {
+            "id": "65",
+            "job_id": "JR#100065",
+            "job_type": "Dispensing",
+            "status": "Pending",
+            "vendor_id": "2",
+            "store_name": "DOLPHINE HOTEL",
+            "geo_lat": "7.2940094",
+            "geo_lng": "79.8396836",
+            "territory": "Negombo"
+        },
+        {
+            "id": "64",
+            "job_id": "JR#100064",
+            "job_type": "Registration",
+            "status": "Pending",
+            "vendor_id": "2",
+            "store_name": "DOLPHINE HOTEL",
+            "geo_lat": "7.2940094",
+            "geo_lng": "79.8396836",
+            "territory": "Negombo"
+        },
+        {
+            "id": "63",
+            "job_id": "JR#100063",
+            "job_type": "Power",
+            "status": "Pending",
+            "vendor_id": "5",
+            "store_name": "GOLDI SANDS",
+            "geo_lat": "7.2455846",
+            "geo_lng": "79.8418470",
+            "territory": "Negombo"
+        },
+        {
+            "id": "62",
+            "job_id": "JR#100062",
+            "job_type": "Hardware",
+            "status": "Pending",
+            "vendor_id": "8",
+            "store_name": "SURANGA CATERS- NEGAMBO",
+            "geo_lat": "7.2373457",
+            "geo_lng": "79.8729596",
+            "territory": "Negombo"
+        }
+    ]
+}

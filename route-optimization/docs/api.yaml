@@ -1,0 +1,166 @@
+openapi: 3.0.0
+info:
+  title: Route Optimization API
+  description: API for optimizing delivery routes for Sunquick Lanka Pvt Ltd
+  version: 2.0.0
+  contact:
+    name: Sunquick Lanka
+    email: support@sunquick.lk
+
+servers:
+  - url: http://localhost/route-optimization/api
+    description: Development server
+  - url: https://api.sunquick.lk/route-optimization
+    description: Production server
+
+paths:
+  /routes.php:
+    get:
+      summary: Route optimization endpoints
+      description: Get optimized routes or job information
+      parameters:
+        - in: query
+          name: action
+          schema:
+            type: string
+            enum: [optimize, optimize-with-maps, jobs, health]
+          required: true
+          description: Action to perform
+        - in: query
+          name: algorithm
+          schema:
+            type: string
+            enum: [nearest_neighbor, 2-opt]
+            default: nearest_neighbor
+          description: Optimization algorithm to use (only for optimize action)
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/OptimizeResponse'
+                  - $ref: '#/components/schemas/JobsResponse'
+                  - $ref: '#/components/schemas/HealthResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    OptimizeResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success, error]
+        route:
+          type: object
+          properties:
+            start:
+              type: object
+              properties:
+                name:
+                  type: string
+                lat:
+                  type: number
+                lng:
+                  type: number
+            stops:
+              type: array
+              items:
+                $ref: '#/components/schemas/Stop'
+            total_distance:
+              type: number
+            total_stops:
+              type: integer
+            algorithm_used:
+              type: string
+            original_jobs:
+              type: integer
+            duplicates_removed:
+              type: integer
+        algorithm:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    Stop:
+      type: object
+      properties:
+        job:
+          type: object
+          properties:
+            id:
+              type: string
+            job_id:
+              type: string
+            store_name:
+              type: string
+            job_type:
+              type: string
+            geo_lat:
+              type: number
+            geo_lng:
+              type: number
+        distance_from_previous:
+          type: number
+        estimated_time:
+          type: number
+        driving_distance:
+          type: string
+        driving_duration:
+          type: string
+    JobsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        jobs:
+          type: array
+          items:
+            type: object
+        total:
+          type: integer
+        unique_locations:
+          type: integer
+        duplicates:
+          type: integer
+        timestamp:
+          type: string
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        timestamp:
+          type: string
+        environment:
+          type: string
+        version:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string

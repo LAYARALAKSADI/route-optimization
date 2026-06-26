@@ -1,0 +1,16 @@
+{
+    "name": "sunquick/route-optimization",
+    "description": "Route Optimization for Sunquick Lanka",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sunquick\\": "src/"
+        }
+    }
+}

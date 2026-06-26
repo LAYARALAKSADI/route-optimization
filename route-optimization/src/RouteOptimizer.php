@@ -25,6 +25,7 @@ class RouteOptimizer {
             ],
             'stops' => [],
             'total_distance' => 0,
+            'total_time' => 0,
             'total_stops' => 0,
             'algorithm_used' => $algorithm
         ];
@@ -68,7 +69,6 @@ class RouteOptimizer {
         $this->optimizedRoute['original_jobs'] = count($unvisited);
         $this->optimizedRoute['duplicates_removed'] = count($unvisited) - count($uniqueJobs);
         
-        
         if ($useGoogleMaps && $this->googleMapsService) {
             return $this->addGoogleMapsData($route);
         }
@@ -81,6 +81,7 @@ class RouteOptimizer {
         $currentLng = $this->startLng;
         $route = [];
         $totalDistance = 0;
+        $totalTime = 0;
         $unvisited = $jobs;
         
         while (!empty($unvisited)) {
@@ -92,7 +93,7 @@ class RouteOptimizer {
                     $nearest['geo_lat'], $nearest['geo_lng']
                 );
                 
-                $time = ($distance / 30) * 60; // Assuming 30 km/h average speed
+                $time = ($distance / 30) * 60;
                 
                 $route[] = [
                     'job' => $nearest,
@@ -101,6 +102,7 @@ class RouteOptimizer {
                 ];
                 
                 $totalDistance += $distance;
+                $totalTime += $time;
                 
                 $currentLat = $nearest['geo_lat'];
                 $currentLng = $nearest['geo_lng'];
@@ -112,13 +114,13 @@ class RouteOptimizer {
         }
         
         $this->optimizedRoute['total_distance'] = round($totalDistance, 2);
+        $this->optimizedRoute['total_time'] = round($totalTime, 1);
         $this->optimizedRoute['algorithm_used'] = 'nearest_neighbor';
         
         return $route;
     }
     
     private function optimizeWith2Opt($jobs) {
-   
         $route = $this->optimizeWithNearestNeighbor($jobs);
         
         $points = array_merge(
@@ -128,7 +130,6 @@ class RouteOptimizer {
             }, $route)
         );
         
-       
         $improved = true;
         $maxIterations = 1000;
         $iteration = 0;
@@ -139,7 +140,6 @@ class RouteOptimizer {
             
             for ($i = 0; $i < count($points) - 2; $i++) {
                 for ($j = $i + 2; $j < count($points) - 1; $j++) {
-                  
                     $d1 = $this->distanceCalculator->calculateDistance(
                         $points[$i]['lat'], $points[$i]['lng'],
                         $points[$i + 1]['lat'], $points[$i + 1]['lng']
@@ -148,7 +148,6 @@ class RouteOptimizer {
                         $points[$j]['lat'], $points[$j]['lng'],
                         $points[$j + 1]['lat'], $points[$j + 1]['lng']
                     );
-                    
                     
                     $nd1 = $this->distanceCalculator->calculateDistance(
                         $points[$i]['lat'], $points[$i]['lng'],
@@ -159,7 +158,6 @@ class RouteOptimizer {
                         $points[$j + 1]['lat'], $points[$j + 1]['lng']
                     );
                     
-                   
                     if ($nd1 + $nd2 < $d1 + $d2) {
                         $points = array_merge(
                             array_slice($points, 0, $i + 1),
@@ -172,14 +170,14 @@ class RouteOptimizer {
                 }
             }
         }
-      
+        
         $optimizedRoute = [];
         $totalDistance = 0;
+        $totalTime = 0;
         $currentLat = $this->startLat;
         $currentLng = $this->startLng;
- 
+        
         for ($i = 1; $i < count($points); $i++) {
-            
             $job = null;
             foreach ($jobs as $j) {
                 if (abs($j['geo_lat'] - $points[$i]['lat']) < 0.0001 && 
@@ -204,12 +202,14 @@ class RouteOptimizer {
                 ];
                 
                 $totalDistance += $distance;
+                $totalTime += $time;
                 $currentLat = $job['geo_lat'];
                 $currentLng = $job['geo_lng'];
             }
         }
         
         $this->optimizedRoute['total_distance'] = round($totalDistance, 2);
+        $this->optimizedRoute['total_time'] = round($totalTime, 1);
         $this->optimizedRoute['algorithm_used'] = '2-opt';
         $this->optimizedRoute['iterations'] = $iteration;
         

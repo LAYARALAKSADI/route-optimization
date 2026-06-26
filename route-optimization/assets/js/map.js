@@ -56,7 +56,6 @@ function initGoogleMap() {
     addMarkerGoogle(startPoint.lat, startPoint.lng, '🏢 Sunquick Lanka Pvt Ltd', true);
 }
 
-
 function addMarkerOpenStreetMap(lat, lng, title, isStart = false) {
     const icon = L.divIcon({
         className: isStart ? 'marker-start' : 'marker-stop',
@@ -83,7 +82,6 @@ function addMarkerOpenStreetMap(lat, lng, title, isStart = false) {
     markers.push(marker);
     return marker;
 }
-
 
 function addMarkerGoogle(lat, lng, title, isStart = false) {
     const marker = new google.maps.Marker({
@@ -142,7 +140,6 @@ function drawRoute(route) {
 }
 
 function drawRouteOpenStreetMap(latlngs, route) {
-  
     routePath = L.polyline(latlngs, {
         color: '#FF6B35',
         weight: 5,
@@ -152,7 +149,6 @@ function drawRouteOpenStreetMap(latlngs, route) {
     
     routePolylines.push(routePath);
     
-  
     const dashedPath = L.polyline(latlngs, {
         color: '#FFFFFF',
         weight: 2,
@@ -162,7 +158,6 @@ function drawRouteOpenStreetMap(latlngs, route) {
     }).addTo(map);
     
     routePolylines.push(dashedPath);
-    
    
     route.stops.forEach((stop, index) => {
         const position = [
@@ -196,7 +191,6 @@ function drawRouteOpenStreetMap(latlngs, route) {
         
         marker.bindPopup(popupContent);
     });
-    
     
     const bounds = L.latLngBounds(latlngs);
     map.fitBounds(bounds, { padding: [50, 50] });
@@ -273,6 +267,13 @@ function displayRouteSummary(route) {
     
     stopsCount.textContent = route.total_stops + ' Stops';
     
+   
+    let totalTimeDisplay = route.total_time || 0;
+    let timeUnit = 'min';
+    if (totalTimeDisplay >= 60) {
+        totalTimeDisplay = Math.round(totalTimeDisplay / 60 * 10) / 10;
+        timeUnit = 'hr';
+    }
     
     summaryContent.innerHTML = `
         <div class="summary-stats">
@@ -292,6 +293,10 @@ function displayRouteSummary(route) {
                 <span class="stat-label">Total Distance</span>
                 <span class="stat-value">${route.total_distance} <span class="unit">km</span></span>
             </div>
+            <div class="stat-item highlight">
+                <span class="stat-label">Total Time</span>
+                <span class="stat-value">${totalTimeDisplay} <span class="unit">${timeUnit}</span></span>
+            </div>
             <div class="stat-item">
                 <span class="stat-label">Algorithm</span>
                 <span class="stat-value stat-value-small">${route.algorithm_used || 'Nearest Neighbor'}</span>
@@ -302,7 +307,6 @@ function displayRouteSummary(route) {
             </div>
         </div>
     `;
-    
    
     let html = '';
     
@@ -331,6 +335,14 @@ function displayRouteSummary(route) {
         const jobNumbers = relatedJobs.map(j => j.job_id).join(', ');
         const jobTypes = relatedJobs.map(j => j.job_type).join(' / ');
         
+        // Format time for display
+        let timeDisplay = stop.estimated_time || 0;
+        let timeText = timeDisplay + ' min';
+        if (timeDisplay >= 60) {
+            timeDisplay = Math.round(timeDisplay / 60 * 10) / 10;
+            timeText = timeDisplay + ' hr';
+        }
+        
         html += `
             <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid #F0F2F5;transition:background 0.2s;" 
                  onmouseover="this.style.background='#FFF0EB'" 
@@ -339,8 +351,8 @@ function displayRouteSummary(route) {
                 <div style="flex:1;min-width:0;">
                     <div style="font-weight:600;color:#1F2937;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${job.store_name}</div>
                     <div style="color:#6B7280;font-size:11px;">
-                         ${jobTypes} - ${jobNumbers}
-                        ${stop.driving_duration ? `  ${stop.driving_duration}` : ''}
+                        ${jobTypes} - ${jobNumbers}
+                        ${stop.driving_duration ? ` ⏱️ ${stop.driving_duration}` : ` ⏱️ ${timeText}`}
                     </div>
                     ${relatedJobs.length > 1 ? `<div style="color:#9CA3AF;font-size:10px;margin-top:2px;"> ${relatedJobs.length} jobs at this location</div>` : ''}
                 </div>
@@ -360,7 +372,7 @@ function displayRouteSummary(route) {
                     <span class="footer-item"><strong>Algorithm:</strong> ${route.algorithm_used || 'Nearest Neighbor'}</span>
                     <span class="footer-item"><strong>Distance:</strong> Haversine Formula</span>
                     <span class="footer-item"><strong>Map:</strong> ${isOpenStreetMap ? 'OpenStreetMap' : 'Google Maps'}</span>
-                    ${route.used_google_maps ? '<span class="footer-item"><strong>Google Maps API</strong> Active</span>' : ''}
+                    ${route.used_google_maps ? '<span class="footer-item"><strong> Google Maps API</strong> Active</span>' : ''}
                 </div>
                 <div class="footer-copyright">
                     Route Optimization v2.0 &copy; ${new Date().getFullYear()} | Sunquick Lanka Pvt Ltd
@@ -370,7 +382,6 @@ function displayRouteSummary(route) {
         footerContainer.style.display = 'block';
     }
 }
-
 
 function clearMarkers() {
     markers.forEach(marker => {
@@ -384,7 +395,6 @@ function clearMarkers() {
     clearRoute();
 }
 
-
 function loadJobs() {
     $('#refreshBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Loading...');
     
@@ -393,7 +403,7 @@ function loadJobs() {
         method: 'GET',
         timeout: 30000,
         success: function(response) {
-            console.log('Jobs response:', response);  // DEBUG
+            console.log('Jobs response:', response);
             
             if (response.status === 'success' && response.jobs) {
                 allJobsData = response.jobs;
@@ -425,7 +435,7 @@ function loadJobs() {
             console.error('Error loading jobs:', xhr.responseText);
         },
         complete: function() {
-            $('#refreshBtn').prop('disabled', false).html('Refresh Jobs');
+            $('#refreshBtn').prop('disabled', false).html(' Refresh Jobs');
         }
     });
 }
@@ -453,7 +463,6 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-
 function addAlgorithmSelector() {
     const container = $('#optimizeBtn').parent();
     
@@ -471,18 +480,14 @@ function addAlgorithmSelector() {
     container.before(selector);
 }
 
-
 $(document).ready(function() {
     console.log('Document ready, initializing...');
     
-  
     initMap();
     
     loadJobs();
-    
    
     addAlgorithmSelector();
-    
   
     $('#optimizeBtn').click(function() {
         const algorithm = $('#algorithmSelect').val();
@@ -518,7 +523,6 @@ $(document).ready(function() {
         });
     });
     
-    
     if (!isOpenStreetMap) {
         $('#optimizeWithMapsBtn').show();
         $('#optimizeWithMapsBtn').click(function() {
@@ -546,7 +550,6 @@ $(document).ready(function() {
         });
     }
 
- 
     $('#refreshBtn').click(function() {
         loadJobs();
         $('#routeSummary').removeClass('visible');

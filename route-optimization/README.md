@@ -225,16 +225,5 @@ Layara Lakshadi
 - Leaflet.js for the interactive mapping library
 - Bootstrap for the responsive UI framework
 - Sunquick Lanka Pvt Ltd for the opportunity to build this solution
-```
 
----
 
-## Now Do This:
-
-1. Open `README.md`
-2. Select all (Ctrl+A)
-3. Delete everything
-4. Paste the entire content above
-5. Save (Ctrl+S)
-
-**Done! Your README is complete.** ✅
